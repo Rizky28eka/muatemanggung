@@ -34,12 +34,13 @@ class RecommendationService
         $top3 = array_slice($scored, 0, 3);
 
         $log = SearchLog::create([
-            'session_id'       => $sessionId,
-            'preference_data'  => $preferences,
-            'top1_mua_id'      => $top3[0]['mua']->id ?? null,
-            'top2_mua_id'      => $top3[1]['mua']->id ?? null,
-            'top3_mua_id'      => $top3[2]['mua']->id ?? null,
-            'similarity_scores'=> array_map(fn ($r) => ['mua_id' => $r['mua']->id, 'score' => $r['score']], $top3),
+            'session_id'        => $sessionId,
+            'preference_data'   => $preferences,
+            'top1_mua_id'       => $top3[0]['mua']->id ?? null,
+            'top2_mua_id'       => $top3[1]['mua']->id ?? null,
+            'top3_mua_id'       => $top3[2]['mua']->id ?? null,
+            'similarity_scores' => array_map(fn ($r) => ['mua_id' => $r['mua']->id, 'score' => $r['score']], $top3),
+            'searched_at'       => now(),
         ]);
 
         return ['results' => $top3, 'log' => $log];
