@@ -92,6 +92,9 @@
             #main-content { padding-top: calc(var(--navbar-h) + 2rem); }
         }
 
+        /* Alpine cloak */
+        [x-cloak] { display: none !important; }
+
         /* Scrollbar thin */
         #desktop-sidebar nav::-webkit-scrollbar,
         #mobile-drawer nav::-webkit-scrollbar { width: 3px; }
@@ -239,11 +242,73 @@
                 {{-- Right side actions --}}
                 <div class="flex items-center gap-2">
 
-                    {{-- Bell --}}
-                    <button class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 cursor-not-allowed transition-colors"
-                            disabled aria-label="Notifikasi">
-                        <i data-lucide="bell" class="w-4 h-4"></i>
-                    </button>
+                    {{-- Bell / Notifications --}}
+                    @php
+                        $unreadNotifications = auth()->user()->unreadNotifications()->take(8)->get();
+                        $unreadCount = auth()->user()->unreadNotifications()->count();
+                        $notifColorClasses = [
+                            'amber'   => 'bg-amber-50 text-amber-500',
+                            'emerald' => 'bg-emerald-50 text-emerald-500',
+                            'rose'    => 'bg-rose-50 text-rose-500',
+                            'sky'     => 'bg-sky-50 text-sky-500',
+                            'primary' => 'bg-primary/10 text-primary',
+                            'slate'   => 'bg-slate-50 text-slate-500',
+                        ];
+                    @endphp
+                    <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+                        <button @click="open = !open" @click.outside="open = false"
+                                class="relative w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+                                aria-label="Notifikasi">
+                            <i data-lucide="bell" class="w-4 h-4"></i>
+                            @if($unreadCount > 0)
+                                <span class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+                                    {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                                </span>
+                            @endif
+                        </button>
+
+                        <div x-show="open" x-transition x-cloak
+                             class="absolute right-0 mt-2 w-80 max-w-[90vw] bg-white rounded-2xl border border-slate-200/60 shadow-lg z-50 overflow-hidden">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                                <span class="text-xs font-bold text-slate-800">Notifikasi</span>
+                                @if($unreadCount > 0)
+                                    <form action="{{ route('notifications.read-all') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="text-[10px] font-bold text-primary hover:underline">Tandai semua dibaca</button>
+                                    </form>
+                                @endif
+                            </div>
+
+                            <div class="max-h-80 overflow-y-auto divide-y divide-slate-50">
+                                @forelse($unreadNotifications as $notification)
+                                    <form action="{{ route('notifications.read', $notification->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-slate-50/80 transition-colors">
+                                            <div class="w-8 h-8 rounded-xl {{ $notifColorClasses[$notification->data['color'] ?? 'slate'] ?? $notifColorClasses['slate'] }} flex items-center justify-center flex-shrink-0">
+                                                <i data-lucide="{{ $notification->data['icon'] ?? 'bell' }}" class="w-4 h-4"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <span class="block text-[11px] font-bold text-slate-800 leading-tight">{{ $notification->data['title'] ?? 'Notifikasi' }}</span>
+                                                <span class="block text-[10px] text-slate-500 mt-0.5 leading-snug">{{ $notification->data['message'] ?? '' }}</span>
+                                                <span class="block text-[9px] text-slate-300 mt-1">{{ $notification->created_at->diffForHumans() }}</span>
+                                            </div>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-1.5"></span>
+                                        </button>
+                                    </form>
+                                @empty
+                                    <div class="px-4 py-8 text-center text-[11px] text-slate-400">
+                                        Tidak ada notifikasi baru.
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            <div class="px-4 py-2.5 border-t border-slate-100">
+                                <a href="{{ route('notifications.index') }}" class="block text-center text-[10px] font-bold text-primary hover:underline">
+                                    Lihat Semua Notifikasi
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                     {{-- Logout --}}
                     <form action="{{ auth()->user()->role === 'admin' ? route('admin.logout') : route('mua.logout') }}" method="POST">

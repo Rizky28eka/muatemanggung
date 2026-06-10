@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\District;
 use App\Models\Mua;
 use App\Models\User;
+use App\Notifications\NewMuaRegistration;
 use App\Services\VectorBuilderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 
 class MuaRegisterController extends Controller
 {
@@ -65,6 +67,10 @@ class MuaRegisterController extends Controller
 
         // 3. Initialize default MUA vector
         $this->vectorBuilder->saveForMua($mua);
+
+        // 4. Notify admins about the new pending registration
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new NewMuaRegistration($mua));
 
         return redirect()->route('login')
             ->with('success', 'Registrasi berhasil! Akun Anda sedang ditinjau oleh Admin. Silakan hubungi admin untuk aktivasi.');

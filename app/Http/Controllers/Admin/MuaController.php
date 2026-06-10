@@ -10,6 +10,8 @@ use App\Models\Mua;
 use App\Models\Theme;
 use App\Models\ThemeType;
 use App\Models\User;
+use App\Notifications\MuaApproved;
+use App\Notifications\MuaStatusToggled;
 use App\Services\VectorBuilderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +51,8 @@ class MuaController extends Controller
         $mua->update(['is_active' => true]);
         $mua->user?->update(['is_active' => true]);
         $vbs->saveForMua($mua->fresh());
+
+        $mua->user?->notify(new MuaApproved());
 
         return back()->with('success', "MUA {$mua->name} berhasil disetujui dan diaktifkan.");
     }
@@ -162,6 +166,8 @@ class MuaController extends Controller
     {
         $mua->update(['is_active' => ! $mua->is_active]);
         $mua->user?->update(['is_active' => $mua->is_active]);
+
+        $mua->user?->notify(new MuaStatusToggled($mua->is_active));
 
         $status = $mua->is_active ? 'diaktifkan' : 'dinonaktifkan';
         return back()->with('success', "MUA {$mua->name} berhasil {$status}.");

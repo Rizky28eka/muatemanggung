@@ -5,20 +5,32 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\District;
 use App\Models\EventType;
+use App\Models\PackageTemplate;
 use App\Models\Theme;
+use App\Models\ThemeType;
 use App\Models\MakeupLook;
+use App\Models\PriceRange;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class MasterDataController extends Controller
 {
-    // Districts
-    public function districtsIndex()
+    public function index()
     {
-        $items = District::orderBy('name')->get();
-        return view('admin.master.districts', compact('items'));
+        $districts   = District::withCount('muas')->orderBy('name')->get();
+        $eventTypes  = EventType::withCount('muas')->orderBy('sort_order')->orderBy('name')->get();
+        $themes      = Theme::withCount('muas')->with('themeTypes')->orderBy('name')->get();
+        $themeTypes  = ThemeType::withCount('muas')->with('theme')->orderBy('name')->get();
+        $makeupLooks = MakeupLook::withCount('muas')->orderBy('name')->get();
+        $priceRanges = PriceRange::orderBy('sort_order')->orderBy('min_price')->get();
+        $packageTemplates = PackageTemplate::with('eventType', 'includes')->withCount('muaPackages')->orderBy('event_type_id')->orderBy('sort_order')->get();
+
+        return view('admin.master.index', compact(
+            'districts', 'eventTypes', 'themes', 'themeTypes', 'makeupLooks', 'priceRanges', 'packageTemplates'
+        ));
     }
 
+    // Districts
     public function districtsStore(Request $request)
     {
         $data = $request->validate([
@@ -40,12 +52,6 @@ class MasterDataController extends Controller
     }
 
     // Event Types
-    public function eventTypesIndex()
-    {
-        $items = EventType::orderBy('sort_order')->orderBy('name')->get();
-        return view('admin.master.event-types', compact('items'));
-    }
-
     public function eventTypesStore(Request $request)
     {
         $data = $request->validate([
@@ -71,12 +77,6 @@ class MasterDataController extends Controller
     }
 
     // Themes
-    public function themesIndex()
-    {
-        $items = Theme::orderBy('name')->get();
-        return view('admin.master.themes', compact('items'));
-    }
-
     public function themesStore(Request $request)
     {
         $data = $request->validate([
@@ -97,13 +97,30 @@ class MasterDataController extends Controller
         return back()->with('success', 'Konsep tema berhasil dihapus.');
     }
 
-    // Makeup Looks
-    public function makeupLooksIndex()
+    // Theme Types
+    public function themeTypesStore(Request $request)
     {
-        $items = MakeupLook::orderBy('name')->get();
-        return view('admin.master.makeup-looks', compact('items'));
+        $data = $request->validate([
+            'theme_id' => 'required|exists:themes,id',
+            'name'     => 'required|string|max:255|unique:theme_types,name',
+        ]);
+
+        ThemeType::create([
+            'theme_id' => $data['theme_id'],
+            'name'     => $data['name'],
+            'slug'     => Str::slug($data['name']),
+        ]);
+
+        return back()->with('success', 'Jenis tema berhasil ditambahkan.');
     }
 
+    public function themeTypesDestroy(ThemeType $themeType)
+    {
+        $themeType->delete();
+        return back()->with('success', 'Jenis tema berhasil dihapus.');
+    }
+
+    // Makeup Looks
     public function makeupLooksStore(Request $request)
     {
         $data = $request->validate([
@@ -122,5 +139,61 @@ class MasterDataController extends Controller
     {
         $makeupLook->delete();
         return back()->with('success', 'Look riasan berhasil dihapus.');
+    }
+
+    // Price Ranges
+    public function priceRangesStore(Request $request)
+    {
+        $data = $request->validate([
+            'label'      => 'required|string|max:255|unique:price_ranges,label',
+            'min_price'  => 'nullable|integer|min:0',
+            'max_price'  => 'nullable|integer|min:0',
+            'sort_order' => 'required|integer|min:0',
+        ]);
+
+        PriceRange::create($data);
+
+        return back()->with('success', 'Rentang harga berhasil ditambahkan.');
+    }
+
+    public function priceRangesDestroy(PriceRange $priceRange)
+    {
+        $priceRange->delete();
+        return back()->with('success', 'Rentang harga berhasil dihapus.');
+    }
+
+    // Package Templates
+    public function packageTemplatesStore(Request $request)
+    {
+        $data = $request->validate([
+            'event_type_id' => 'required|exists:event_types,id',
+            'name'          => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'sort_order'    => 'required|integer|min:0',
+            'includes'      => 'nullable|string',
+        ]);
+
+        $template = PackageTemplate::create([
+            'event_type_id' => $data['event_type_id'],
+            'name'          => $data['name'],
+            'description'   => $data['description'] ?? null,
+            'sort_order'    => $data['sort_order'],
+        ]);
+
+        $lines = array_filter(array_map('trim', explode("\n", $data['includes'] ?? '')));
+        foreach (array_values($lines) as $i => $line) {
+            $template->includes()->create([
+                'include_item' => $line,
+                'sort_order'   => $i,
+            ]);
+        }
+
+        return back()->with('success', 'Template paket berhasil ditambahkan.');
+    }
+
+    public function packageTemplatesDestroy(PackageTemplate $packageTemplate)
+    {
+        $packageTemplate->delete();
+        return back()->with('success', 'Template paket berhasil dihapus.');
     }
 }

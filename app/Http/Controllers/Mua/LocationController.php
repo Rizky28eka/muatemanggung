@@ -33,7 +33,7 @@ class LocationController extends Controller
             'district_id'       => $data['district_id'],
             'address'           => $data['address'] ?? null,
             'is_home_service'   => $request->boolean('is_home_service'),
-            'service_radius_km' => $data['service_radius_km'] ?? null,
+            'service_radius_km' => $data['service_radius_km'] ?? 0,
         ]);
 
         $mua->serviceDistricts()->sync($request->input('service_district_ids', []));

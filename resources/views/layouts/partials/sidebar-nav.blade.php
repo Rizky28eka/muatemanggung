@@ -28,15 +28,35 @@
             <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
             <span class="truncate">Mitra MUA</span>
         </a>
+
+        <a href="{{ route('admin.master.index') }}" class="{{ $navClass(Route::is('admin.master.*')) }}">
+            <i data-lucide="database" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="truncate">Master Data</span>
+        </a>
     </div>
 
-    <div class="space-y-0.5">
+    <div class="space-y-0.5" x-data="{ open: {{ Route::is('admin.monitoring.*') ? 'true' : 'false' }} }">
         <span class="block px-3 text-[9px] font-bold uppercase tracking-widest text-slate-400/80 mb-1.5 mt-1">Monitoring</span>
 
-        <a href="{{ route('admin.monitoring.searches') }}" class="{{ $navClass(Route::is('admin.monitoring.searches')) }}">
-            <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>
-            <span class="truncate">Log Pencarian</span>
-        </a>
+        <button type="button" @click="open = !open" class="{{ $navClass(Route::is('admin.monitoring.*')) }} w-full justify-between">
+            <span class="flex items-center gap-3">
+                <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>
+                <span class="truncate">Monitoring</span>
+            </span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+        </button>
+
+        <div x-show="open" x-transition class="pl-4 space-y-0.5">
+            <a href="{{ route('admin.monitoring.index') }}" class="{{ $navClass(Route::is('admin.monitoring.index')) }}">
+                <i data-lucide="layout-grid" class="w-4 h-4 flex-shrink-0"></i>
+                <span class="truncate">Ringkasan</span>
+            </a>
+
+            <a href="{{ route('admin.monitoring.searches') }}" class="{{ $navClass(Route::is('admin.monitoring.searches')) }}">
+                <i data-lucide="search" class="w-4 h-4 flex-shrink-0"></i>
+                <span class="truncate">Log Pencarian</span>
+            </a>
+        </div>
     </div>
 
 @elseif($isMua)

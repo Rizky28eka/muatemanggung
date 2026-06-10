@@ -15,6 +15,9 @@ use App\Http\Controllers\Mua\PackageController as MuaPackageController;
 use App\Http\Controllers\Mua\PortfolioController as MuaPortfolioController;
 use App\Http\Controllers\Admin\MuaController as AdminMuaController;
 use App\Http\Controllers\Admin\SearchLogController;
+use App\Http\Controllers\Admin\MonitoringController;
+use App\Http\Controllers\Admin\MasterDataController;
+use App\Http\Controllers\NotificationController;
 
 // Guest
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -36,6 +39,11 @@ Route::post('/mua/logout', [LoginController::class, 'logout'])->name('mua.logout
 // Authentication-protected routes
 Route::middleware(['auth'])->group(function () {
 
+    // Notifications (shared between admin & mua)
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifikasi/{id}/baca', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifikasi/baca-semua', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+
     // Admin Group
     Route::middleware(['admin'])->group(function () {
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -53,7 +61,32 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/mua/{mua}/toggle', [AdminMuaController::class, 'toggleActive'])->name('admin.mua.toggle');
 
         // Monitoring
+        Route::get('/admin/monitoring', [MonitoringController::class, 'index'])->name('admin.monitoring.index');
         Route::get('/admin/monitoring/searches', [SearchLogController::class, 'index'])->name('admin.monitoring.searches');
+
+        // Master Data
+        Route::get('/admin/master', [MasterDataController::class, 'index'])->name('admin.master.index');
+
+        Route::post('/admin/master/districts', [MasterDataController::class, 'districtsStore'])->name('admin.master.districts.store');
+        Route::delete('/admin/master/districts/{district}', [MasterDataController::class, 'districtsDestroy'])->name('admin.master.districts.destroy');
+
+        Route::post('/admin/master/event-types', [MasterDataController::class, 'eventTypesStore'])->name('admin.master.event-types.store');
+        Route::delete('/admin/master/event-types/{eventType}', [MasterDataController::class, 'eventTypesDestroy'])->name('admin.master.event-types.destroy');
+
+        Route::post('/admin/master/themes', [MasterDataController::class, 'themesStore'])->name('admin.master.themes.store');
+        Route::delete('/admin/master/themes/{theme}', [MasterDataController::class, 'themesDestroy'])->name('admin.master.themes.destroy');
+
+        Route::post('/admin/master/theme-types', [MasterDataController::class, 'themeTypesStore'])->name('admin.master.theme-types.store');
+        Route::delete('/admin/master/theme-types/{themeType}', [MasterDataController::class, 'themeTypesDestroy'])->name('admin.master.theme-types.destroy');
+
+        Route::post('/admin/master/makeup-looks', [MasterDataController::class, 'makeupLooksStore'])->name('admin.master.makeup-looks.store');
+        Route::delete('/admin/master/makeup-looks/{makeupLook}', [MasterDataController::class, 'makeupLooksDestroy'])->name('admin.master.makeup-looks.destroy');
+
+        Route::post('/admin/master/price-ranges', [MasterDataController::class, 'priceRangesStore'])->name('admin.master.price-ranges.store');
+        Route::delete('/admin/master/price-ranges/{priceRange}', [MasterDataController::class, 'priceRangesDestroy'])->name('admin.master.price-ranges.destroy');
+
+        Route::post('/admin/master/package-templates', [MasterDataController::class, 'packageTemplatesStore'])->name('admin.master.package-templates.store');
+        Route::delete('/admin/master/package-templates/{packageTemplate}', [MasterDataController::class, 'packageTemplatesDestroy'])->name('admin.master.package-templates.destroy');
     });
 
     // MUA Group

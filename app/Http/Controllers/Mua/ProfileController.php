@@ -60,7 +60,7 @@ class ProfileController extends Controller
             'whatsapp_number'    => $data['whatsapp_number'] ?? null,
             'instagram_username' => $data['instagram_username'] ?? null,
             'is_home_service'    => $request->boolean('is_home_service'),
-            'service_radius_km'  => $data['service_radius_km'] ?? null,
+            'service_radius_km'  => $data['service_radius_km'] ?? 0,
             'logo'               => $data['logo'] ?? $mua->logo,
         ]);
 

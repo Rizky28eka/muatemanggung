@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Mua;
 use App\Models\SearchLog;
+use App\Notifications\NewRecommendationMatch;
 
 class RecommendationService
 {
@@ -42,6 +43,10 @@ class RecommendationService
             'similarity_scores' => array_map(fn ($r) => ['mua_id' => $r['mua']->id, 'score' => $r['score']], $top3),
             'searched_at'       => now(),
         ]);
+
+        if (! empty($top3[0])) {
+            $top3[0]['mua']->user?->notify(new NewRecommendationMatch($log, $top3[0]['score']));
+        }
 
         return ['results' => $top3, 'log' => $log];
     }
