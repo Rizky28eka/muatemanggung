@@ -30,4 +30,16 @@ class SearchLog extends Model
     public function getScore1Attribute(): ?float { return $this->similarity_scores[0]['score'] ?? null; }
     public function getScore2Attribute(): ?float { return $this->similarity_scores[1]['score'] ?? null; }
     public function getScore3Attribute(): ?float { return $this->similarity_scores[2]['score'] ?? null; }
+
+    public function getDistrictNameAttribute(): ?string
+    {
+        $id = $this->preference_data['district_id'] ?? null;
+        return $id ? \App\Models\District::find($id)?->name : null;
+    }
+
+    public function getEventTypeNameAttribute(): ?string
+    {
+        $id = $this->preference_data['event_type_id'] ?? null;
+        return $id ? \App\Models\EventType::find($id)?->name : null;
+    }
 }

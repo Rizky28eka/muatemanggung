@@ -109,6 +109,9 @@ class Mua extends Model
 
     public function getLogoUrlAttribute(): string
     {
+        if ($this->logo && filter_var($this->logo, FILTER_VALIDATE_URL)) {
+            return $this->logo;
+        }
         return $this->logo
             ? asset('storage/' . $this->logo)
             : asset('images/mua-placeholder.png');

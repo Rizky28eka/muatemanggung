@@ -20,17 +20,47 @@ class MuaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Mua::with('district', 'user')
-            ->when($request->search, fn ($q, $s) =>
-                $q->where('name', 'like', "%{$s}%")->orWhere('address', 'like', "%{$s}%")
+        $search = $request->search;
+
+        $pending = Mua::with('district', 'user')
+            ->where('is_active', false)
+            ->when($search, fn ($q) =>
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$search}%"))
             )
-            ->when($request->status === 'active',   fn ($q) => $q->where('is_active', true))
-            ->when($request->status === 'inactive', fn ($q) => $q->where('is_active', false))
-            ->latest();
+            ->latest()
+            ->get();
 
-        $muas = $query->paginate(15)->withQueryString();
+        $approved = Mua::with('district', 'user')
+            ->where('is_active', true)
+            ->when($search, fn ($q) =>
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$search}%"))
+            )
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('admin.mua.index', compact('muas'));
+        return view('admin.mua.index', compact('pending', 'approved'));
+    }
+
+    public function approve(Mua $mua, VectorBuilderService $vbs)
+    {
+        $mua->update(['is_active' => true]);
+        $mua->user?->update(['is_active' => true]);
+        $vbs->saveForMua($mua->fresh());
+
+        return back()->with('success', "MUA {$mua->name} berhasil disetujui dan diaktifkan.");
+    }
+
+    public function reject(Mua $mua)
+    {
+        DB::transaction(function () use ($mua) {
+            $mua->user?->delete();
+            $mua->delete();
+        });
+
+        return back()->with('success', "Pendaftaran MUA {$mua->name} telah ditolak dan dihapus.");
     }
 
     public function create()
@@ -71,6 +101,12 @@ class MuaController extends Controller
         });
 
         return redirect()->route('admin.mua.index')->with('success', 'Akun MUA berhasil dibuat.');
+    }
+
+    public function show(Mua $mua)
+    {
+        $mua->load('district', 'user', 'eventTypes', 'themes', 'themeTypes', 'makeupLooks', 'serviceDistricts', 'packages', 'portfolios');
+        return view('admin.mua.show', compact('mua'));
     }
 
     public function edit(Mua $mua)

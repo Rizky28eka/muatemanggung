@@ -9,6 +9,10 @@ use App\Models\Mua;
 use App\Models\Theme;
 use App\Models\ThemeType;
 use App\Models\User;
+use App\Models\PackageTemplate;
+use App\Models\MuaPackage;
+use App\Models\MuaPortfolio;
+use App\Services\VectorBuilderService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -160,7 +164,115 @@ class MuaSeeder extends Seeder
             ],
         ];
 
-        foreach ($muas as $data) {
+        $logoUrls = [
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1489426411172-044a508f245c?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=300&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&fit=crop&q=80'
+        ];
+
+        $portfolioPhotos = [
+            [
+                'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1515688594390-b649af70d282?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1526045431048-f857369aba09?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1503249023995-51b0f3778ccf?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1522337094846-8a818192de2f?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1515688594390-b649af70d282?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1522337094846-8a818192de2f?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1526045431048-f857369aba09?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1503249023995-51b0f3778ccf?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&auto=format&fit=crop&q=80'
+            ],
+            [
+                'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80'
+            ]
+        ];
+
+        $pricesMap = [
+            'akad' => [
+                'Makeup Only' => 1500000,
+                'Makeup + Wardrobe' => 3000000,
+                'Makeup + Dokumentasi + Dekor' => 7500000
+            ],
+            'resepsi' => [
+                'Pengantin (Makeup Only)' => 2000000,
+                'Pengantin + Orang Tua' => 3500000,
+                'Pengantin + Ortu + Domas + Penerima Tamu' => 6000000
+            ],
+            'lamaran' => [
+                'Makeup Only' => 800000,
+                'Makeup + Wardrobe + Dekor + Dokumentasi' => 3000000
+            ],
+            'siraman' => [
+                'Paket Lengkap' => 1800000,
+                'Paket Biasa' => 1000000
+            ],
+            'prewed' => [
+                'Makeup Only' => 750000,
+                'Makeup + Wardrobe (Indoor)' => 1500000,
+                'Makeup + Wardrobe (Outdoor)' => 2000000
+            ],
+            'wisuda' => [
+                'Makeup Only' => 350000,
+                'Makeup + Wardrobe' => 700000
+            ],
+            'yearbook' => [
+                'Makeup Only' => 300000,
+                'Makeup + Wardrobe' => 600000
+            ],
+            'character-penokohan' => [
+                'Makeup + Wardrobe' => 1200000
+            ],
+            'makeup-tari' => [
+                'Makeup Only' => 250000,
+                'Makeup + Wardrobe' => 500000
+            ]
+        ];
+
+        foreach ($muas as $index => $data) {
             $mua = Mua::firstOrCreate(
                 ['slug' => Str::slug($data['name'])],
                 [
@@ -172,8 +284,14 @@ class MuaSeeder extends Seeder
                     'service_radius_km'  => 30,
                     'district_id'        => District::where('slug', $data['district'])->value('id'),
                     'is_active'          => true,
+                    'logo'               => $logoUrls[$index % count($logoUrls)],
                 ]
             );
+
+            // If MUA already exists but logo is null, update logo
+            if (empty($mua->logo)) {
+                $mua->update(['logo' => $logoUrls[$index % count($logoUrls)]]);
+            }
 
             // Buat akun user untuk MUA
             $user = User::firstOrCreate(
@@ -203,6 +321,53 @@ class MuaSeeder extends Seeder
             $mua->serviceDistricts()->sync(
                 District::whereIn('slug', $data['districts'])->pluck('id')
             );
+
+            // Seed Portfolios
+            $photos = $portfolioPhotos[$index % count($portfolioPhotos)];
+            foreach ($photos as $i => $url) {
+                MuaPortfolio::firstOrCreate(
+                    [
+                        'mua_id'    => $mua->id,
+                        'file_path' => $url,
+                    ],
+                    [
+                        'file_type'  => 'photo',
+                        'caption'    => 'Hasil makeup profesional oleh ' . $mua->name,
+                        'sort_order' => $i + 1,
+                    ]
+                );
+            }
+
+            // Seed Packages based on MUA's event types
+            foreach ($data['event_types'] as $eventSlug) {
+                $eventType = EventType::where('slug', $eventSlug)->first();
+                if (!$eventType) continue;
+
+                $templates = PackageTemplate::where('event_type_id', $eventType->id)->get();
+                foreach ($templates as $tpl) {
+                    $price = $pricesMap[$eventSlug][$tpl->name] ?? 1000000;
+                    
+                    // Generate includes as custom description comma-separated
+                    $includes = $tpl->includes->pluck('include_item')->toArray();
+                    $customDesc = implode(', ', $includes);
+
+                    MuaPackage::firstOrCreate(
+                        [
+                            'mua_id'              => $mua->id,
+                            'package_template_id' => $tpl->id,
+                        ],
+                        [
+                            'is_available'       => true,
+                            'custom_description' => $customDesc,
+                            'price'              => $price,
+                            'notes'              => 'Harga dapat bervariasi tergantung transport dan request tambahan.',
+                        ]
+                    );
+                }
+            }
+
+            // Regenerate Vector Biner
+            app(VectorBuilderService::class)->saveForMua($mua);
         }
     }
 }

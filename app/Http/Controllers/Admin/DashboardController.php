@@ -11,6 +11,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized.');
+        }
+
         $stats = [
             'total_mua'    => Mua::count(),
             'active_mua'   => Mua::where('is_active', true)->count(),

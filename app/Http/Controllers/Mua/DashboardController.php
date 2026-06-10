@@ -8,6 +8,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        if (!auth()->user()->isMua()) {
+            abort(403, 'Unauthorized.');
+        }
+
         $mua = auth()->user()->mua()->with([
             'packages', 'portfolios', 'vector',
             'eventTypes', 'serviceDistricts',

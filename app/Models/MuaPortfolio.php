@@ -15,6 +15,9 @@ class MuaPortfolio extends Model
 
     public function getUrlAttribute(): string
     {
+        if (filter_var($this->file_path, FILTER_VALIDATE_URL)) {
+            return $this->file_path;
+        }
         return asset('storage/' . $this->file_path);
     }
 
