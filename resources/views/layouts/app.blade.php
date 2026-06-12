@@ -33,11 +33,20 @@
 </head>
 <body class="bg-slate-50 text-body antialiased min-h-screen flex flex-col">
 
-    <!-- Header / Navigation (Floating Pill Layout) -->
-    <div class="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-8 pt-4 pointer-events-none" x-data="{ mobileMenuOpen: false }">
-        <header class="max-w-7xl mx-auto w-full bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-lg shadow-primary/5 pointer-events-auto transition-all duration-300 rounded-full px-6"
-                :class="mobileMenuOpen ? 'rounded-3xl' : 'rounded-full'">
-            <div class="flex items-center justify-between h-16">
+    <!-- Header / Navigation (Floating Pill Layout with scroll and load animations) -->
+    <div class="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-8 transition-all duration-500 pointer-events-none"
+         x-data="{ mobileMenuOpen: false, scrolled: false, loaded: false }"
+         x-init="setTimeout(() => loaded = true, 50)"
+         @scroll.window="scrolled = window.scrollY > 30"
+         :class="scrolled ? 'pt-2' : 'pt-4'">
+        <header class="max-w-7xl mx-auto w-full bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-lg shadow-primary/5 pointer-events-auto transform transition-all duration-500"
+                :class="[
+                    mobileMenuOpen ? 'rounded-3xl' : 'rounded-full',
+                    scrolled ? 'shadow-md shadow-primary/10 border-slate-200/80 max-w-5xl scale-[0.98] bg-white/95 px-4' : 'shadow-lg shadow-primary/5 border-slate-200/50 px-6',
+                    loaded ? 'translate-y-0 opacity-100' : '-translate-y-12 opacity-0'
+                ]">
+            <div class="flex items-center justify-between transition-all duration-500"
+                 :class="scrolled ? 'h-13' : 'h-16'">
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center gap-2 group">

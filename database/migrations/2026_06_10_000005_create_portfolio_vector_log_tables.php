@@ -12,7 +12,8 @@ return new class extends Migration
         Schema::create('mua_portfolios', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mua_id')->constrained()->cascadeOnDelete();
-            $table->string('file_path');
+            $table->string('file_path')->nullable();
+            $table->text('embed_url')->nullable();
             $table->enum('file_type', ['photo', 'video'])->default('photo');
             $table->string('caption')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);

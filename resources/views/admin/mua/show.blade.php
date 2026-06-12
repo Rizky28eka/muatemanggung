@@ -98,7 +98,7 @@
                             <span class="text-slate-400 font-medium">Instagram</span>
                             <a href="{{ $mua->ig_link }}" target="_blank"
                                class="text-pink-600 font-semibold hover:underline">
-                                @{{ $mua->instagram_username }}
+                                &#64;{{ $mua->instagram_username }}
                             </a>
                         </div>
                         @endif
@@ -246,7 +246,7 @@
                         @foreach($mua->portfolios->take(8) as $portfolio)
                             <div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
                                 @if($portfolio->file_type === 'photo')
-                                    <img src="{{ asset('storage/' . $portfolio->file_path) }}"
+                                    <img src="{{ $portfolio->url }}"
                                          alt="{{ $portfolio->caption }}"
                                          class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                          loading="lazy">

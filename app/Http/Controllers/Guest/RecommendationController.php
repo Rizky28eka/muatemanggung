@@ -40,7 +40,29 @@ class RecommendationController extends Controller
         ]);
 
         $eventType = EventType::find($data['event_type_id']);
-        $data['is_siraman'] = ($eventType && strtolower($eventType->slug ?? '') === 'siraman');
+        $isSiraman = ($eventType && strtolower($eventType->slug ?? '') === 'siraman');
+        $data['is_siraman'] = $isSiraman;
+
+        if ($isSiraman) {
+            $adatTheme = Theme::where('slug', 'adat')->first();
+            if ($adatTheme) {
+                if (!empty($data['theme_id']) && $data['theme_id'] != $adatTheme->id) {
+                    return back()->withErrors(['theme_id' => 'Acara Siraman hanya boleh menggunakan Tema Adat.'])->withInput();
+                }
+                $data['theme_id'] = $adatTheme->id;
+
+                if (!empty($data['theme_type_id'])) {
+                    $typeBelongsToAdat = ThemeType::where('id', $data['theme_type_id'])
+                        ->where('theme_id', $adatTheme->id)
+                        ->exists();
+                    if (!$typeBelongsToAdat) {
+                        return back()->withErrors(['theme_type_id' => 'Jenis tema tidak cocok dengan acara Siraman.'])->withInput();
+                    }
+                } else {
+                    $data['theme_type_id'] = ThemeType::where('theme_id', $adatTheme->id)->where('slug', 'jawa')->value('id');
+                }
+            }
+        }
 
         $session = session()->getId();
         ['results' => $results, 'log' => $log] = $rs->recommend($data, $session);

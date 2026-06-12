@@ -31,9 +31,10 @@
                     if (this.isSiraman) {
                         this.theme = '{{ $themes->where('slug', 'adat')->first()->id ?? '' }}';
                         this.themeType = '{{ $themeTypes->where('slug', 'jawa')->first()->id ?? '' }}'; // Default Jawa for adat
-                        // Skip theme choice step
+                        this.step = 4; // Skip theme choice step (step 2 & 3)
+                    } else {
+                        this.step = 2;
                     }
-                    this.step = 2;
                 },
                 nextStep() {
                     if (this.step === 2 && this.isSiraman) {

@@ -35,18 +35,23 @@ class ProfileController extends Controller
         $mua = auth()->user()->mua;
 
         $data = $request->validate([
-            'description'        => 'nullable|string',
+            'description'        => 'nullable|string|max:1000',
             'address'            => 'nullable|string|max:255',
-            'whatsapp_number'    => 'nullable|string|max:20',
-            'instagram_username' => 'nullable|string|max:100',
+            'whatsapp_number'    => ['nullable', 'string', 'regex:/^[0-9]+$/', 'min:9', 'max:15'],
+            'instagram_username' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9._]+$/', 'max:30'],
             'is_home_service'    => 'boolean',
-            'service_radius_km'  => 'nullable|integer|min:0',
-            'logo'               => 'nullable|image|max:2048',
+            'service_radius_km'  => 'nullable|integer|min:0|max:100',
+            'logo'               => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'event_type_ids'     => 'nullable|array',
+            'event_type_ids.*'   => 'exists:event_types,id',
             'theme_ids'          => 'nullable|array',
+            'theme_ids.*'        => 'exists:themes,id',
             'theme_type_ids'     => 'nullable|array',
+            'theme_type_ids.*'   => 'exists:theme_types,id',
             'makeup_look_ids'    => 'nullable|array',
+            'makeup_look_ids.*'  => 'exists:makeup_looks,id',
             'service_district_ids' => 'nullable|array',
+            'service_district_ids.*' => 'exists:districts,id',
         ]);
 
         if ($request->hasFile('logo')) {

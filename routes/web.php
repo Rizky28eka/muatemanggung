@@ -30,6 +30,10 @@ Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.process');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// MUA Registration
+Route::get('/register', [MuaRegisterController::class, 'showRegister'])->name('mua.register');
+Route::post('/register', [MuaRegisterController::class, 'register'])->name('mua.register.process');
+
 // Compatibility aliases
 Route::get('/admin/login', fn() => redirect()->route('login'))->name('admin.login');
 Route::get('/mua/login', fn() => redirect()->route('login'))->name('mua.login');
@@ -111,9 +115,6 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
-// MUA register (public)
-Route::get('/mua/register', [MuaRegisterController::class, 'showRegister'])->name('mua.register');
-Route::post('/mua/register', [MuaRegisterController::class, 'register'])->name('mua.register.process');
 
 // MUA public detail page
 Route::get('/mua/{slug}', [MuaDetailController::class, 'show'])->name('mua.show');

@@ -33,9 +33,9 @@ class PackageController extends Controller
 
         $data = $request->validate([
             'package_template_id' => 'required|exists:package_templates,id',
-            'price'               => 'required|integer|min:0',
-            'custom_description'  => 'nullable|string',
-            'notes'               => 'nullable|string',
+            'price'               => 'required|integer|min:0|max:1000000000',
+            'custom_description'  => 'nullable|string|max:1000',
+            'notes'               => 'nullable|string|max:500',
             'is_available'        => 'boolean',
         ]);
 
@@ -57,9 +57,9 @@ class PackageController extends Controller
         abort_if($package->mua_id !== auth()->user()->mua->id, 403);
 
         $data = $request->validate([
-            'price'              => 'required|integer|min:0',
-            'custom_description' => 'nullable|string',
-            'notes'              => 'nullable|string',
+            'price'              => 'required|integer|min:0|max:1000000000',
+            'custom_description' => 'nullable|string|max:1000',
+            'notes'              => 'nullable|string|max:500',
             'is_available'       => 'boolean',
         ]);
 

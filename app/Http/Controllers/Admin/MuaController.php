@@ -184,13 +184,13 @@ class MuaController extends Controller
         return $request->validate([
             'name'              => 'required|string|max:255',
             'email'             => $emailUnique,
-            'password'          => $muaId ? 'nullable|string|min:6' : 'required|string|min:6',
-            'description'       => 'nullable|string',
+            'password'          => $muaId ? 'nullable|string|min:6|max:100' : 'required|string|min:6|max:100',
+            'description'       => 'nullable|string|max:1000',
             'address'           => 'nullable|string|max:255',
-            'whatsapp_number'   => 'nullable|string|max:20',
-            'instagram_username'=> 'nullable|string|max:100',
+            'whatsapp_number'   => ['nullable', 'string', 'regex:/^[0-9]+$/', 'min:9', 'max:15'],
+            'instagram_username'=> ['nullable', 'string', 'regex:/^[a-zA-Z0-9._]+$/', 'max:30'],
             'is_home_service'   => 'boolean',
-            'service_radius_km' => 'nullable|integer|min:0',
+            'service_radius_km' => 'nullable|integer|min:0|max:100',
             'district_id'       => 'required|exists:districts,id',
             'is_active'         => 'boolean',
         ]);

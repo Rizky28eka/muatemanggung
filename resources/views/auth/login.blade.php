@@ -107,11 +107,11 @@
             <!-- Registration trigger -->
             <div class="pt-4 border-t border-hairline text-center">
                 <p class="text-xs text-muted">
-                    Tertarik mendaftarkan usaha MUA Anda?
+                    Belum mendaftarkan usaha MUA Anda?
                 </p>
                 <a href="{{ route('mua.register') }}" 
-                   class="inline-block mt-2 text-xs font-bold text-accent hover:text-accent-active transition-colors">
-                    Daftar Sebagai Mitra MUA ➜
+                   class="inline-block mt-2 text-xs font-bold text-primary hover:text-primary-active transition-colors">
+                    Daftar Mitra MUA Baru ➜
                 </a>
             </div>
 

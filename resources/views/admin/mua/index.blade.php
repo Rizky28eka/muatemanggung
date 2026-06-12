@@ -11,8 +11,15 @@
             <p class="text-xs text-slate-500 mt-0.5">Tinjau pendaftaran baru dan kelola mitra aktif.</p>
         </div>
 
-        {{-- Search --}}
-        <form method="GET" action="{{ route('admin.mua.index') }}" class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('admin.mua.create') }}"
+               class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 active:scale-95 transition flex-shrink-0">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                Tambah MUA
+            </a>
+
+            {{-- Search --}}
+            <form method="GET" action="{{ route('admin.mua.index') }}" class="flex items-center gap-2">
             <div class="relative">
                 <i data-lucide="search" class="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400"></i>
                 <input type="text" name="search" value="{{ request('search') }}"
@@ -30,6 +37,7 @@
                 </a>
             @endif
         </form>
+        </div>
     </div>
 
     {{-- ── Flash Messages ── --}}
@@ -215,7 +223,7 @@
                                                     {{ $mua->name }}
                                                 </span>
                                                 @if($mua->instagram_username)
-                                                    <span class="text-[10px] text-slate-400">@{{ $mua->instagram_username }}</span>
+                                                    <span class="text-[10px] text-slate-400">&#64;{{ $mua->instagram_username }}</span>
                                                 @endif
                                             </div>
                                         </div>

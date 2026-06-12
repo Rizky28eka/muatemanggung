@@ -97,11 +97,19 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             @foreach($mua->portfolios as $portfolio)
                                 <div class="aspect-square rounded-xl bg-slate-50 border border-hairline overflow-hidden relative group">
-                                    <img src="{{ $portfolio->url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $portfolio->caption }}">
-                                    <!-- Light overlay on hover -->
-                                    <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                                        <p class="text-[10px] text-white font-medium truncate w-full">{{ $portfolio->caption }}</p>
-                                    </div>
+                                    @if($portfolio->embed_url)
+                                        <iframe src="{{ $portfolio->embed_url }}" class="w-full h-full object-cover" frameborder="0" allowfullscreen></iframe>
+                                    @elseif($portfolio->isVideo())
+                                        <video src="{{ $portfolio->url }}" class="w-full h-full object-cover" controls preload="metadata"></video>
+                                    @else
+                                        <img src="{{ $portfolio->url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $portfolio->caption }}">
+                                    @endif
+                                    @if(!$portfolio->embed_url)
+                                        <!-- Light overlay on hover -->
+                                        <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 pointer-events-none">
+                                            <p class="text-[10px] text-white font-medium truncate w-full">{{ $portfolio->caption }}</p>
+                                        </div>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>

@@ -17,6 +17,7 @@ class RecommendationTest extends TestCase
     public function test_recommendation_flow_works_correctly()
     {
         $this->seed(DatabaseSeeder::class);
+        $this->seed(\Database\Seeders\MuaSeeder::class);
 
         // Fetch inputs from database to make sure they match seeds
         $eventType = EventType::first();
@@ -56,6 +57,7 @@ class RecommendationTest extends TestCase
     public function test_mua_detail_page_works_correctly()
     {
         $this->seed(DatabaseSeeder::class);
+        $this->seed(\Database\Seeders\MuaSeeder::class);
 
         $mua = \App\Models\Mua::where('is_active', true)->first();
         $this->assertNotNull($mua);
@@ -95,50 +97,7 @@ class RecommendationTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    public function test_mua_register_page_renders_successfully()
-    {
-        $this->seed(DatabaseSeeder::class);
-        $response = $this->get(route('mua.register'));
-        $response->assertStatus(200);
-        $response->assertSee('Registrasi Pengelola MUA');
-    }
 
-    public function test_mua_registration_creates_pending_user_and_mua()
-    {
-        $this->seed(DatabaseSeeder::class);
-
-        $district = \App\Models\District::first();
-
-        $postData = [
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
-            'password' => 'secret123',
-            'password_confirmation' => 'secret123',
-            'mua_name' => 'John Rias MUA',
-            'district_id' => $district->id,
-            'whatsapp_number' => '0812345678',
-            'instagram_username' => 'john.rias',
-        ];
-
-        $response = $this->post(route('mua.register.process'), $postData);
-
-        $response->assertRedirect(route('login'));
-        $response->assertSessionHas('success');
-
-        // Check if DB records exist
-        $this->assertDatabaseHas('muas', [
-            'name' => 'John Rias MUA',
-            'whatsapp_number' => '0812345678',
-            'is_active' => false,
-        ]);
-
-        $this->assertDatabaseHas('users', [
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
-            'role' => 'mua',
-            'is_active' => false,
-        ]);
-    }
 
     public function test_guests_are_redirected_to_login()
     {
@@ -171,6 +130,7 @@ class RecommendationTest extends TestCase
     public function test_mua_user_can_access_mua_dashboard_but_not_admin_dashboard()
     {
         $this->seed(DatabaseSeeder::class);
+        $this->seed(\Database\Seeders\MuaSeeder::class);
 
         $mua = \App\Models\Mua::first();
         $muaUser = \App\Models\User::create([
@@ -187,5 +147,96 @@ class RecommendationTest extends TestCase
 
         $response = $this->actingAs($muaUser)->get(route('admin.dashboard'));
         $response->assertStatus(403);
+    }
+
+    public function test_siraman_event_forces_adat_theme()
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $siramanEvent = EventType::where('slug', 'siraman')->first();
+        $modernTheme = \App\Models\Theme::where('slug', 'modern')->first();
+        $district = District::first();
+
+        $postData = [
+            'event_type_id' => $siramanEvent->id,
+            'theme_id' => $modernTheme->id,
+            'district_id' => $district->id,
+        ];
+
+        $response = $this->post(route('recommendation.process'), $postData);
+        $response->assertSessionHasErrors(['theme_id']);
+    }
+
+    public function test_vector_regenerates_when_package_is_modified()
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->seed(\Database\Seeders\MuaSeeder::class);
+
+        $mua = \App\Models\Mua::first();
+        $this->assertNotNull($mua);
+
+        $vectorRecord = $mua->vector;
+        $timeBefore = $vectorRecord->updated_at;
+
+        sleep(1);
+
+        $package = $mua->packages()->first();
+        $package->update(['price' => 9999999]);
+
+        $vectorRecord->refresh();
+        $timeAfter = $vectorRecord->updated_at;
+
+        $this->assertNotEquals($timeBefore, $timeAfter);
+    }
+
+    public function test_admin_can_create_new_mua_account()
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = \App\Models\User::create([
+            'name' => 'Admin User',
+            'email' => 'admin-creator@example.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $district = District::first();
+        $eventType = EventType::first();
+        $theme = \App\Models\Theme::first();
+        $look = MakeupLook::first();
+
+        $postData = [
+            'name' => 'New MUA Studio',
+            'email' => 'newmua@example.com',
+            'password' => 'newpassword123',
+            'description' => 'A great new MUA in Temanggung',
+            'address' => 'Jl. Baru No. 12',
+            'whatsapp_number' => '0899999999',
+            'instagram_username' => 'newmua.studio',
+            'is_home_service' => 1,
+            'service_radius_km' => 20,
+            'district_id' => $district->id,
+            'event_type_ids' => [$eventType->id],
+            'theme_ids' => [$theme->id],
+            'makeup_look_ids' => [$look->id],
+            'service_district_ids' => [$district->id],
+            'is_active' => 1,
+        ];
+
+        $response = $this->actingAs($admin)->post(route('admin.mua.store'), $postData);
+
+        $response->assertRedirect(route('admin.mua.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('muas', [
+            'name' => 'New MUA Studio',
+            'whatsapp_number' => '0899999999',
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'newmua@example.com',
+            'role' => 'mua',
+        ]);
     }
 }

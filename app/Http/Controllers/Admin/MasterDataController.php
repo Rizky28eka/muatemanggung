@@ -168,9 +168,9 @@ class MasterDataController extends Controller
         $data = $request->validate([
             'event_type_id' => 'required|exists:event_types,id',
             'name'          => 'required|string|max:255',
-            'description'   => 'nullable|string',
+            'description'   => 'nullable|string|max:1000',
             'sort_order'    => 'required|integer|min:0',
-            'includes'      => 'nullable|string',
+            'includes'      => 'nullable|string|max:2000',
         ]);
 
         $template = PackageTemplate::create([

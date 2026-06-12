@@ -39,8 +39,8 @@ class MuaRegisterController extends Controller
             'password'           => ['required', 'string', 'min:8', 'confirmed'],
             'mua_name'           => ['required', 'string', 'max:255'],
             'district_id'        => ['required', 'exists:districts,id'],
-            'whatsapp_number'    => ['required', 'string', 'max:20'],
-            'instagram_username' => ['nullable', 'string', 'max:50'],
+            'whatsapp_number'    => ['required', 'string', 'regex:/^[0-9]+$/', 'min:9', 'max:15'],
+            'instagram_username' => ['nullable', 'string', 'regex:/^[a-zA-Z0-9._]+$/', 'max:30'],
         ]);
 
         // 1. Create MUA profile
